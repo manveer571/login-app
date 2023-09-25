@@ -4,7 +4,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const ejs =require('ejs');
 const mongoose =require('mongoose');
-const encrypt = require('mongoose-encryption');
+// hash module
+const md5  = require('md5')
+// const encrypt = require('mongoose-encryption');
 
 
 // create app
@@ -25,7 +27,7 @@ const userSchema = new mongoose.Schema({
 
 
 // encryting the data
-userSchema.plugin(encrypt,{secret:process.env.secret,encryptedFields:["password"]});
+// userSchema.plugin(encrypt,{secret:process.env.secret,encryptedFields:["password"]});
 
 // creating the model
 const User = mongoose.model("User",userSchema);
@@ -46,7 +48,7 @@ app.get('/login',(req,res)=>{
 app.post('/register',(req,res)=>{
     const newUser = new User({
         email:req.body.username,
-        password:req.body.password
+        password:md5(req.body.password) //turn the password into irreversible hash code
     })
     newUser.save();
     res.render('secrets.ejs');
