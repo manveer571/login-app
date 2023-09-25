@@ -58,7 +58,7 @@ app.post('/login',async(req,res)=>{
     const founduser =  await User.findOne({email:req.body.username})
        if(founduser)
               {
-                if(founduser.password === req.body.password)
+                if(founduser.password === md5(req.body.password))
                 {res.render('secrets');}
               
               else{
