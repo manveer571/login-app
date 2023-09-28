@@ -4,6 +4,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const ejs =require('ejs');
 const mongoose =require('mongoose');
+const bcrypt  =require('bcrypt');
+const saltround=10;
 // hash module
 const md5  = require('md5')
 // const encrypt = require('mongoose-encryption');
@@ -46,25 +48,29 @@ app.get('/login',(req,res)=>{
 })
 
 app.post('/register',(req,res)=>{
-    const newUser = new User({
+    bcrypt.hash(req.body.password,saltround,function(err,hash){
+        const newUser = new User({
         email:req.body.username,
-        password:md5(req.body.password) //turn the password into irreversible hash code
+        password:hash //turn the password into irreversible hash code
     })
     newUser.save();
     res.render('secrets.ejs');
+
+    })
+    
 })
 app.post('/login',async(req,res)=>{
     try {
     const founduser =  await User.findOne({email:req.body.username})
        if(founduser)
               {
-                if(founduser.password === md5(req.body.password))
-                {res.render('secrets');}
-              
-              else{
-                res.redirect('/login');
-              }}
-     else{
+                bcrypt.compare(req.body.password,founduser.password,function(err,result){
+                    if(result===true)
+                    res.render('secrets')
+                   else
+                   res.redirect('login')
+                })}
+                else{
             res.redirect('/login');
           }          
      }
